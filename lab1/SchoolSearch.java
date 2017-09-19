@@ -6,33 +6,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.function.Consumer;
 
 public class SchoolSearch {
     private List<Student> students = new ArrayList<>();
-    
+
     public static void main(String[] args) {
         SchoolSearch program = new SchoolSearch();
         program.runQueries();
     }
-    
+
     private void runQueries() {
         readFile();
-  
+
         String inputString = "";
         String[] tokens;
         Scanner input = new Scanner(System.in);
         char firstLetter;
-        
+
         do {
             System.out.println("Enter a query:");
-            tokens = input.nextLine().split("\\s");
-            firstLetter = tokens[0].charAt(0); 
+            inputString = input.nextLine();
+            tokens = inputString.split("\\s");
+            firstLetter = tokens[0].charAt(0);
 
             switch(firstLetter) {
-                case 'S':   studentLastname(tokens);
+                case 'S':   studentLastname(inputString);
                             break;
 
-                case 'T':   teacherLastname(tokens);
+                case 'T':   teacherLastname(inputString);
                             break;
 
                 case 'B':   bus(tokens);
@@ -48,7 +52,7 @@ public class SchoolSearch {
                 			break;
             }
 
-            System.out.println();            
+            System.out.println();
         } while(firstLetter != 'Q');
     }
 
@@ -56,7 +60,7 @@ public class SchoolSearch {
     private void readFile() {
       String line = null;
       String fileName = "./students.txt";
-      Scanner s; 
+      Scanner s;
 
       try{
          FileReader fileReader = new FileReader(fileName);
@@ -80,39 +84,49 @@ public class SchoolSearch {
       }
       catch(FileNotFoundException ex) {
          System.out.println(
-               "Unable to open file '" + 
-               fileName + "'");                
+               "Unable to open file '" +
+               fileName + "'");
       }
       catch(IOException ex) {
          System.out.println(
-               "Error reading file '" 
-               + fileName + "'");                  
+               "Error reading file '"
+               + fileName + "'");
       }
     }
 
-    private void studentLastname(String[] tokens) {
-    	if(tokens.length != 2) {
-    		if(tokens.length != 3 || tokens[2].charAt(0) != 'B') {
-    			return;
-    		}
-    	}
+    private void studentLastname(String input) {
+    	Pattern commandFormat = Pattern.compile("^\\s?(?:S|Student|s)\\s(\\w+)\\s?(B|b?)$");
+      Matcher matcher = commandFormat.matcher(input);
+      Consumer<Student> printer;
 
-        List<Student> results = students.stream().filter(s -> s.lastName.equals(tokens[1])).collect(Collectors.toList());
+      if(!matcher.matches()) {
+        return;
+      }
 
-        if(tokens.length == 2) {
-	        for(Student student : results) {
-	            System.out.println("Student: " + student.lastName + ", " + student.firstName + ", Grade: " + student.grade + ", Classroom: " + student.classroom + ", Teacher: " + student.tLastName + ", " + student.tFirstName);
-	        }
-    	}
-    	else {
-	        for(Student student : results) {
-	            System.out.println("Student: " + student.lastName + ", " + student.firstName + ",  Bus:" + student.bus);
-	        }
-    	}
+      List<Student> results = students.stream().filter(s -> s.lastName.equalsIgnoreCase(matcher.group(1))).collect(Collectors.toList());
+      if(matcher.group(2).equals("")) {
+        printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ", Grade: " + student.grade + ", Classroom: " + student.classroom + ", Teacher: " + student.tLastName + ", " + student.tFirstName);
+      }
+      else {
+        printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ",  Bus:" + student.bus);
+      }
+
+      results.stream().forEach(printer);
     }
 
-    private void teacherLastname(String[] tokens) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void teacherLastname(String input) {
+      Pattern commandFormat = Pattern.compile("^\\s?(?:T|Teacher|t)\\s(\\w+)\\s?");
+      Matcher matcher = commandFormat.matcher(input);
+      Consumer<Student> printer;
+
+      if(!matcher.matches()) {
+        return;
+      }
+
+      List<Student> results = students.stream().filter(s -> s.tLastName.equalsIgnoreCase(matcher.group(1))).collect(Collectors.toList());
+
+      printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName);
+      results.stream().forEach(printer);
     }
 
     private void bus(String[] tokens) {
@@ -130,7 +144,7 @@ public class SchoolSearch {
     private void info(String[] tokens) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     private static class Student{
 
       String lastName;
@@ -142,7 +156,7 @@ public class SchoolSearch {
       String tLastName;
       String tFirstName;
 
-      public Student(String ln, String fn, int grade, int cr, int bus, double gpa, 
+      public Student(String ln, String fn, int grade, int cr, int bus, double gpa,
             String tln, String tfn){
          lastName = ln;
          firstName = fn;
@@ -155,5 +169,5 @@ public class SchoolSearch {
       }
 
    }
-    
+
 }
