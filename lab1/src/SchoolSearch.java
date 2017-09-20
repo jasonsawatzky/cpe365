@@ -1,7 +1,13 @@
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -12,25 +18,45 @@ import java.util.function.Consumer;
 
 public class SchoolSearch {
     private List<Student> students = new ArrayList<>();
+	private InputStream dataInput;
+	private InputStream queryInput;
+	private OutputStream output;
+	private PrintStream out;
 
     public static void main(String[] args) {
-        SchoolSearch program = new SchoolSearch();
-        program.runQueries();
+    	InputStream dataInput = null;
+		try {
+			dataInput = new FileInputStream("./students.txt");
+		} catch (FileNotFoundException e) {
+			System.err.println("students.txt not found");
+			System.exit(1);
+		}
+    	InputStream queryInput = System.in;
+    	OutputStream output = System.out;
+    	
+        SchoolSearch schoolSearch = new SchoolSearch(dataInput, queryInput, output);
+        schoolSearch.start();
+    }
+    
+    public SchoolSearch(InputStream dataInput, InputStream queryInput, OutputStream output) {
+    	this.dataInput = dataInput;
+    	this.queryInput = queryInput;
+    	this.output = output;
+    	this.out = new PrintStream(output);
+    	readStudents();
     }
 
-    private void runQueries() {
-        readFile();
-
+    public void start() {
         String inputString = "";
-        String[] tokens;
-        Scanner input = new Scanner(System.in);
+        Scanner queryScanner = new Scanner(queryInput);
+        
         char firstLetter;
 
         do {
-            System.out.println("Enter a query:");
-            inputString = input.nextLine();
-            tokens = inputString.split("\\s");
-            firstLetter = tokens[0].charAt(0);
+            out.println("Enter a query:");
+            
+            inputString = queryScanner.nextLine();
+            firstLetter = inputString.charAt(0);
 
             switch(firstLetter) {
                 case 'S':   studentLastname(inputString);
@@ -39,42 +65,37 @@ public class SchoolSearch {
                 case 'T':   teacherLastname(inputString);
                             break;
 
-                case 'B':   bus(tokens);
+                case 'B':   bus(inputString);
                             break;
 
-                case 'G':   grade(tokens);
+                case 'G':   grade(inputString);
                             break;
 
-                case 'A':   average(tokens);
+                case 'A':   average(inputString);
                             break;
 
-                case 'I':   info(tokens);
+                case 'I':   info(inputString);
                 			break;
             }
 
-            System.out.println();
         } while(firstLetter != 'Q');
     }
 
 
-    private void readFile() {
-      String line = null;
-      String fileName = "./students.txt";
-      Scanner s;
-
-      try{
-         FileReader fileReader = new FileReader(fileName);
-         BufferedReader br = new BufferedReader(fileReader);
-         while((line = br.readLine()) != null){
-            s = new Scanner(line).useDelimiter(",");
-            String ln = s.next();
-            String fn = s.next();
-            int grade = s.nextInt();
-            int cr = s.nextInt();
-            int bus = s.nextInt();
-            double gpa = s.nextDouble();
-            String tln = s.next();
-            String tfn = s.next();
+    private void readStudents() {
+    	String line;
+        Scanner studentScanner = new Scanner(dataInput).useDelimiter(",");
+        
+        while(studentScanner.hasNextLine()){
+        	line = studentScanner.nextLine();
+            String ln = studentScanner.next();
+            String fn = studentScanner.next();
+            int grade = studentScanner.nextInt();
+            int cr = studentScanner.nextInt();
+            int bus = studentScanner.nextInt();
+            double gpa = studentScanner.nextDouble();
+            String tln = studentScanner.next();
+            String tfn = studentScanner.next();
 
             Student student = new Student(ln,fn,grade,cr,bus,gpa,tln,tfn);
 
@@ -82,17 +103,8 @@ public class SchoolSearch {
 
          }
       }
-      catch(FileNotFoundException ex) {
-         System.out.println(
-               "Unable to open file '" +
-               fileName + "'");
-      }
-      catch(IOException ex) {
-         System.out.println(
-               "Error reading file '"
-               + fileName + "'");
-      }
-    }
+     
+   
 
     private void studentLastname(String input) {
     	Pattern commandFormat = Pattern.compile("^\\s?(?:S|Student|s)\\s(\\w+)\\s?(B|b?)$");
@@ -100,14 +112,14 @@ public class SchoolSearch {
       Consumer<Student> printer;
 
       if(!matcher.matches()) {
-        System.out.println("Didn't match!");
         return;
       }
-      System.out.println("Matched!");
 
       List<Student> results = students.stream().filter(s -> s.lastName.equalsIgnoreCase(matcher.group(1))).collect(Collectors.toList());
       if(matcher.group(2).equals("")) {
-        printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ", Grade: " + student.grade + ", Classroom: " + student.classroom + ", Teacher: " + student.tLastName + ", " + student.tFirstName);
+        printer = student ->
+        	out.println("Student: " + student.lastName + ", " + student.firstName + ", Grade: " + student.grade + ", Classroom: " + student.classroom + ", Teacher: " + student.tLastName + ", " + student.tFirstName);
+ 
       }
       else {
         printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ",  Bus:" + student.bus);
@@ -131,19 +143,19 @@ public class SchoolSearch {
       results.stream().forEach(printer);
     }
 
-    private void bus(String[] tokens) {
+    private void bus(String input) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private void grade(String[] tokens) {
+    private void grade(String input) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private void average(String[] tokens) {
+    private void average(String input) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private void info(String[] tokens) {
+    private void info(String input) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
