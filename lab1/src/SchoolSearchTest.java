@@ -18,16 +18,6 @@ public class SchoolSearchTest {
 	static OutputStream output;
 	static InputStream dataInput;
 	
-	public static void main(String[] args) {
-	      Result result = JUnitCore.runClasses(SchoolSearchTest.class);
-			
-	      for (Failure failure : result.getFailures()) {
-	         System.out.println(failure.toString());
-	      }
-			
-	      System.out.println(result.wasSuccessful());
-	   }
-	
 	@BeforeClass
 	public static void setupStudentData() {
 		try {
