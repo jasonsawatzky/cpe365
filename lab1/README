@@ -1,0 +1,4 @@
+To compile and run the program, type ./schoolsearch
+To test the program, type ./tests.txt
+testoutput contains the output of the test script
+
