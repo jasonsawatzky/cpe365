@@ -1,0 +1,4 @@
+#!/bin/bash
+javac SchoolSearch.java
+java SchoolSearch
+rm *.class

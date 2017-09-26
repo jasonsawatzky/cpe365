@@ -1,0 +1,156 @@
+#!/bin/bash
+
+javac SchoolSearch.java
+
+printf "\nTesting Query:"
+printf "S COMO\nQ\n"
+
+printf "S COMO\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Enter a query:\nStudent: COMO, ZANDRA, Grade: 4, Classroom: 112, Teacher: CHIONCHIO, PERLA\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "S COMO B\nQ\n"
+
+printf "S COMO B\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Enter a query:\nStudent: COMO, ZANDRA, Bus: 53\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "T CHIONCHIO\nQ\n"
+
+printf "T CHIONCHIO\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Enter a query:\nStudent: WORBINGTON, DEEDRA\nStudent: SPANICEK, KENDRA\nStudent: GUICE, CODI\nStudent: GLOR, HUNG\nStudent: GUM, NOAH\nStudent: NOVICK, ROLLAND\nStudent: DELUNA, KRYSTAL\nStudent: COMO, ZANDRA\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "G 1\nQ\n"
+
+printf "G 1\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Enter a query:\nStudent: SAELEE, DANILO\nStudent: GARTH, JOHN\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "G 1 High\nQ\n"
+
+printf "G 1 High\nQ\n" > queryInput
+
+java  SchoolSearch < queryInput > output
+
+printf "Enter a query:\nStudent: GARTH, JOHN, GPA: 3.14, Teacher: FALKER, ADOLPH, Bus: 0\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "G 1 Low\nQ\n"
+
+printf "G 1 Low\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Enter a query:\nStudent: SAELEE, DANILO, GPA: 2.85, Teacher: FALKER, ADOLPH, Bus: 54\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "Bus 55\nQ\n"
+
+printf "Bus 55\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Enter a query:\nStudent: SWEDLUND, SHARRI, Grade: 3, Classroom: 107\nStudent: ZAPPAVIGNA, ELLIOTT, Grade: 6, Classroom: 106\nStudent: SAENPHIMMACHA, NUMBERS, Grade: 6, Classroom: 111\nStudent: BOYTER, WAN, Grade: 6, Classroom: 102\nStudent: KOZOLA, BUSTER, Grade: 2, Classroom: 108\nStudent: DEMARTINI, DEWAYNE, Grade: 6, Classroom: 102\nStudent: BEX, TAMESHA, Grade: 4, Classroom: 105\nStudent: WERST, LEON, Grade: 6, Classroom: 111\nStudent: LAMKIN, TAMA, Grade: 6, Classroom: 111\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "A 1\nQ\n"
+
+printf "A 1\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Enter a query:\nStudent 2.850000 total GPA 0.000000
+Student 3.140000 total GPA 2.850000\nGrade: 1, Average: 2.995\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "I\nQ\n"
+
+printf "I\nQ\n" > queryInput
+
+java  SchoolSearch < queryInput > output
+
+printf "Enter a query:\n0: 0\n1: 2\n2: 13\n3: 9\n4: 15\n5: 0\n6: 21\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "I 5\nQ\n"
+
+printf "I 5\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Enter a query:\\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "I\nQ\n"
+echo "with missing file"
+
+mv students.txt students-dne.txt
+
+printf "I\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Unable to open file './students.txt'\n" > expectedOutput
+
+diff output expectedOutput -s
+
+mv students-dne.txt students.txt
+
+
+rm queryInput
+rm expectedOutput
+rm output
+rm *.class
