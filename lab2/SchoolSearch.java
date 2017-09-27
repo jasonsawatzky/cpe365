@@ -112,7 +112,7 @@ public class SchoolSearch {
          while((line = br.readLine()) != null){
             s = new Scanner(line).useDelimiter(",");
             String ln = s.next();
-            String fn = s.next();
+            String fn = s.next().substring(1);
             int grade = s.nextInt();
             int cr = s.nextInt();
             int bus = s.nextInt();
