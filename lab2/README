@@ -2,3 +2,25 @@ To compile and run the program, type ./schoolsearch
 To test the program, type ./tests.txt
 testoutput contains the output of the test script
 
+New commands:
+
+To query teachers that teach a particular grade, type:
+G <Grade> T
+
+To query students in a particular classroom, type:
+C <Classroom>
+
+To query teachers in a particular classroom, type:
+C <Classroom> T
+
+To query the number of students in each classroom, type:
+E
+
+To display performance data by grade, type:
+P G
+
+To display performance data by teacher, type:
+P T
+
+To display performance data by bus, type:
+P B

@@ -150,6 +150,99 @@ diff output expectedOutput -s
 mv list-dne.txt list.txt
 
 
+
+printf "\nTesting Query:"
+printf "G 1 T\nQ\n"
+
+
+printf "G 1 T\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Enter a query:\nTeacher: FALKER, ADOLPH\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "C 101\nQ\n"
+
+
+printf "C 101\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Enter a query:\nStudent: DURAND, CARLEE\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+
+printf "\nTesting Query:"
+printf "C 102 T\nQ\n"
+
+
+printf "C 102 T\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Enter a query:\nTeacher: KERBS, BENITO\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "E\nQ\n"
+
+
+printf "E\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+printf "Enter a query:\nClassroom: 112 # of Students: 8\nClassroom: 101 # of Students: 1\nClassroom: 102 # of Students: 5\nClassroom: 103 # of Students: 2\nClassroom: 104 # of Students: 2\nClassroom: 105 # of Students: 6\nClassroom: 106 # of Students: 2\nClassroom: 107 # of Students: 7\nClassroom: 108 # of Students: 11\nClassroom: 109 # of Students: 5\nClassroom: 110 # of Students: 2\nClassroom: 111 # of Students: 9\n\nEnter a query:\n\n" > expectedOutput
+
+diff output expectedOutput -s
+
+
+
+printf "\nTesting Query:"
+printf "P G\nQ\n"
+
+
+printf "P G\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+diff output testoutput1 -s
+
+
+
+printf "\nTesting Query:"
+printf "P T\nQ\n"
+
+
+printf "P T\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+diff output testoutput2 -s
+
+
+
+printf "\nTesting Query:"
+printf "P B\nQ\n"
+
+
+printf "P B\nQ\n" > queryInput
+
+java SchoolSearch < queryInput > output
+
+diff output testoutput3 -s
+
+
 rm queryInput
 rm expectedOutput
 rm output
