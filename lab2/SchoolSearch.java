@@ -9,6 +9,8 @@ import java.util.stream.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.function.Consumer;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SchoolSearch {
     private static final int MINGRADE = 0;
@@ -21,7 +23,8 @@ public class SchoolSearch {
     }
 
     private void runQueries() {
-        readFile();
+        Map<Integer, Teacher> teachers = readTeachers();
+        readFile(teachers);
 
         String inputString = "";
         String[] tokens;
@@ -61,10 +64,46 @@ public class SchoolSearch {
         } while(firstLetter != 'Q' && firstLetter != 'q');
     }
 
+    private Map<Integer, Teacher> readTeachers() {
+        String line = null;
+        String fileName = "./teachers.txt";
+        Map<Integer, Teacher> teachers = new HashMap<>();
+        Scanner s;
+        String fn;
+        String ln;
+        int rn;
 
-    private void readFile() {
+        try{
+           FileReader fileReader = new FileReader(fileName);
+           BufferedReader br = new BufferedReader(fileReader);
+           while((line = br.readLine()) != null){
+              s = new Scanner(line).useDelimiter(", ");
+              ln = s.next();
+              fn = s.next();
+              rn = Integer.parseInt(s.next());
+              teachers.put(new Integer(rn), new Teacher(ln, fn));
+           }
+        }
+        catch(FileNotFoundException ex) {
+           System.out.println(
+                 "Unable to open file '" +
+                 fileName + "'");
+           		System.exit(1);
+        }
+        catch(IOException ex) {
+           System.out.println(
+                 "Error reading file '"
+                 + fileName + "'");
+    		 System.exit(1);
+
+        }
+
+        return teachers;
+    }
+
+    private void readFile(Map<Integer, Teacher> teachers) {
       String line = null;
-      String fileName = "./students.txt";
+      String fileName = "./list.txt";
       Scanner s;
 
       try{
@@ -78,10 +117,9 @@ public class SchoolSearch {
             int cr = s.nextInt();
             int bus = s.nextInt();
             double gpa = s.nextDouble();
-            String tln = s.next();
-            String tfn = s.next();
+            Teacher t = teachers.get(cr);
 
-            Student student = new Student(ln,fn,grade,cr,bus,gpa,tln,tfn);
+            Student student = new Student(ln,fn,grade,cr,bus,gpa, t);
 
             students.add(student);
 
@@ -113,7 +151,7 @@ public class SchoolSearch {
 
       List<Student> results = students.stream().filter(s -> s.lastName.equalsIgnoreCase(matcher.group(1))).collect(Collectors.toList());
       if(matcher.group(2).equals("")) {
-        printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ", Grade: " + student.grade + ", Classroom: " + student.classroom + ", Teacher: " + student.tLastName + ", " + student.tFirstName);
+        printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ", Grade: " + student.grade + ", Classroom: " + student.classroom + ", Teacher: " + student.teacher.lastName + ", " + student.teacher.firstName);
       }
       else {
         printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ", Bus: " + student.bus);
@@ -131,7 +169,7 @@ public class SchoolSearch {
         return;
       }
 
-      List<Student> results = students.stream().filter(s -> s.tLastName.equalsIgnoreCase(matcher.group(1))).collect(Collectors.toList());
+      List<Student> results = students.stream().filter(s -> s.teacher.lastName.equalsIgnoreCase(matcher.group(1))).collect(Collectors.toList());
 
       printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName);
       results.stream().forEach(printer);
@@ -142,17 +180,17 @@ public class SchoolSearch {
         Matcher matcher = commandFormat.matcher(input);
         Consumer<Student> printer;
         Integer bus;
-        
+
         if(!matcher.matches()){
             return;
         }
-        
+
         bus = Integer.parseInt(matcher.group(1));
-        
+
         List<Student> results = students.stream().filter(s -> s.bus.equals(bus)).collect(Collectors.toList());
-        
+
         printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ", Grade: " + student.grade + ", Classroom: " + student.classroom);
-        
+
         results.stream().forEach(printer);
 
     }
@@ -166,13 +204,13 @@ public class SchoolSearch {
         final double GPAFinal2;
         Matcher matcher = commandFormat.matcher(input);
         Consumer<Student> printer;
-        
+
         if(!matcher.matches()) {
             return;
         }
         grade = Integer.parseInt(matcher.group(1));
         List<Student> results = students.stream().filter(s -> s.grade.equals(grade)).collect(Collectors.toList());
-        
+
         if(matcher.group(2).equals("")) {
             printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName);
             results.stream().forEach(printer);
@@ -187,9 +225,9 @@ public class SchoolSearch {
                 GPAFinal = tempGPA;
                 results = results.stream().filter(s -> s.gpa.equals(GPAFinal)).collect(Collectors.toList());
             }
-            
+
             if(matcher.group(2).equals("L") || matcher.group(2).equals("l") || matcher.group(2).equals("Low")){
-                
+
                 for(int i = 0; i < results.size(); i ++){
                     if(results.get(i).gpa < temp2GPA){
                         temp2GPA = results.get(i).gpa;
@@ -198,11 +236,11 @@ public class SchoolSearch {
                 GPAFinal2 = temp2GPA;
                 results = results.stream().filter(s -> s.gpa.equals(GPAFinal2)).collect(Collectors.toList());
             }
-            
-            printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ", GPA: " + student.gpa + ", Teacher: " + student.tLastName + ", " + student.tFirstName + ", Bus: " + student.bus);
+
+            printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ", GPA: " + student.gpa + ", Teacher: " + student.teacher.lastName + ", " + student.teacher.firstName + ", Bus: " + student.bus);
             results.stream().forEach(printer);
         }
-        
+
     }
 
     private void average(String input) {
@@ -212,7 +250,7 @@ public class SchoolSearch {
         Integer grade;
         Matcher matcher = commandFormat.matcher(input);
         Consumer<Student> printer;
-        
+
         if(!matcher.matches()) {
             return;
         }
@@ -224,23 +262,23 @@ public class SchoolSearch {
         }
         avgGPA = GPATotal/results.size();
             System.out.println("Grade: " + grade + ", " + "Average: " + avgGPA);
-        
+
     }
 
     private void info(Integer grade, String input) {
     	 Pattern commandFormat = Pattern.compile("^\\s?(?:I|Info|i)\\s?$");
          Matcher matcher = commandFormat.matcher(input);
          Consumer<Student> printer;
-         
+
          if(!matcher.matches()) {
              return;
          }
-       
+
         List<Student> results = students.stream().filter(s -> s.grade.equals(grade)).collect(Collectors.toList());
         System.out.printf("%d: %d\n",grade,results.size());
     }
 
-    private static class Student{
+    private static class Student {
 
       String lastName;
       String firstName;
@@ -248,21 +286,28 @@ public class SchoolSearch {
       int classroom;
       Integer bus;
       Double gpa;
-      String tLastName;
-      String tFirstName;
+      Teacher teacher;
 
-      public Student(String ln, String fn, Integer grade, int cr, Integer bus, Double gpa,
-            String tln, String tfn){
+      public Student(String ln, String fn, Integer grade, int cr, Integer bus, Double gpa, Teacher t){
          lastName = ln;
          firstName = fn;
          this.grade = grade;
          classroom = cr;
          this.bus = bus;
          this.gpa = gpa;
-         tLastName = tln;
-         tFirstName = tfn;
+         teacher = t;
       }
 
+   }
+
+   private static class Teacher {
+     String lastName;
+     String firstName;
+
+     public Teacher(String ln, String fn) {
+       lastName = ln;
+       firstName = fn;
+     }
    }
 
 }
