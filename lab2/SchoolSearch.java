@@ -196,21 +196,23 @@ public class SchoolSearch {
     }
 
     private void grade(String input) {
-        Pattern commandFormat = Pattern.compile("^\\s?(?:G|Grade|g)\\s(\\w)\\s?(H|High|h|L|Low|l?)$");
+        Pattern commandFormat = Pattern.compile("^\\s?(?:G|Grade|g)\\s(\\w)\\s?((?:H|High|h|L|Low|l|T|t|Teacher)?)$");
         double tempGPA = 0;
         double temp2GPA = 5;
-        Integer grade;
+        Integer grade, teach = 0;
         final double GPAFinal;
         final double GPAFinal2;
         Matcher matcher = commandFormat.matcher(input);
         Consumer<Student> printer;
-
+        Consumer<Teacher> printerT;
+        
         if(!matcher.matches()) {
             return;
         }
         grade = Integer.parseInt(matcher.group(1));
         List<Student> results = students.stream().filter(s -> s.grade.equals(grade)).collect(Collectors.toList());
-
+        List<Teacher> tlist = new ArrayList<>();
+        
         if(matcher.group(2).equals("")) {
             printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName);
             results.stream().forEach(printer);
@@ -225,9 +227,9 @@ public class SchoolSearch {
                 GPAFinal = tempGPA;
                 results = results.stream().filter(s -> s.gpa.equals(GPAFinal)).collect(Collectors.toList());
             }
-
+            
             if(matcher.group(2).equals("L") || matcher.group(2).equals("l") || matcher.group(2).equals("Low")){
-
+                
                 for(int i = 0; i < results.size(); i ++){
                     if(results.get(i).gpa < temp2GPA){
                         temp2GPA = results.get(i).gpa;
@@ -236,13 +238,30 @@ public class SchoolSearch {
                 GPAFinal2 = temp2GPA;
                 results = results.stream().filter(s -> s.gpa.equals(GPAFinal2)).collect(Collectors.toList());
             }
-
-            printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ", GPA: " + student.gpa + ", Teacher: " + student.teacher.lastName + ", " + student.teacher.firstName + ", Bus: " + student.bus);
-            results.stream().forEach(printer);
+            
+            if(matcher.group(2).equals("T") || matcher.group(2).equals("t") || matcher.group(2).equals("Teacher")){
+                teach = 1;
+                results = results.stream().filter(s -> s.grade.equals(grade)).collect(Collectors.toList());
+                for(int i = 0; i < results.size(); i++){
+                    if(!tlist.contains(results.get(i).teacher)){
+                        tlist.add(results.get(i).teacher);
+                    }
+                }
+                
+            }
+            
+            if(teach == 0){
+                printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ", GPA: " + student.gpa + ", Teacher: " + student.teacher.lastName + ", " + student.teacher.firstName + ", Bus: " + student.bus);
+                results.stream().forEach(printer);
+            }
+            
+            if(teach == 1){
+                printerT = teacher -> System.out.println("Teacher: " + teacher.lastName + ", " + teacher.firstName);
+                tlist.stream().forEach(printerT);
+            }
         }
-
+        
     }
-
     private void average(String input) {
         Pattern commandFormat = Pattern.compile("^\\s?(?:A|Average|a)\\s(\\w)\\s?$");
         Double GPATotal = 0.0;
