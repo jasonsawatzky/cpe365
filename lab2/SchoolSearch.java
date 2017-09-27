@@ -47,6 +47,9 @@ public class SchoolSearch {
 
                 case 'B':   bus(inputString);
                             break;
+                
+                case 'C':   classSearch(inputString);
+                            break;
 
                 case 'G':   grade(inputString);
                             break;
@@ -276,6 +279,7 @@ public class SchoolSearch {
         Integer grade;
         Matcher matcher = commandFormat.matcher(input);
         Consumer<Student> printer;
+        List<Teacher> tlist = new ArrayList<>();
 
         if(!matcher.matches()) {
             return;
@@ -304,6 +308,39 @@ public class SchoolSearch {
         System.out.printf("%d: %d\n",grade,results.size());
     }
 
+    private void classSearch(String input){
+        Integer classroom;
+        Pattern commandFormat = Pattern.compile("^\\s?(?:C|Class|c)\\s(\\w\\w\\w)\\s?((?:T|Teacher|t)?)$");
+        Matcher matcher = commandFormat.matcher(input);
+        Consumer<Student> printer;
+        Consumer<Teacher> printerT;
+        
+        
+        if(!matcher.matches()) {
+            return;
+        }
+         classroom = Integer.parseInt(matcher.group(1));
+        List<Student> results = students.stream().filter(s -> s.classroom.equals(classroom)).collect(Collectors.toList());
+        List<Teacher> tlist = new ArrayList<>();
+        
+        if(matcher.group(2).equals("")) {
+            printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName);
+            results.stream().forEach(printer);
+        }
+        
+        if(matcher.group(2).equals("T") || matcher.group(2).equals("t") || matcher.group(2).equals("Teacher")){
+            for(int i = 0; i < results.size(); i++){
+                if(!tlist.contains(results.get(i).teacher)){
+                    tlist.add(results.get(i).teacher);
+                }
+            }
+            printerT = teacher -> System.out.println("Teacher: " + teacher.lastName + ", " + teacher.firstName);
+            tlist.stream().forEach(printerT);
+        }
+
+        
+    }
+    
     private void enrollment() {
       Map<Integer, Integer> studentCount = new HashMap<>();
 
@@ -346,12 +383,12 @@ public class SchoolSearch {
       String lastName;
       String firstName;
       Integer grade;
-      int classroom;
+      Integer classroom;
       Integer bus;
       Double gpa;
       Teacher teacher;
 
-      public Student(String ln, String fn, Integer grade, int cr, Integer bus, Double gpa, Teacher t){
+      public Student(String ln, String fn, Integer grade, Integer cr, Integer bus, Double gpa, Teacher t){
          lastName = ln;
          firstName = fn;
          this.grade = grade;
