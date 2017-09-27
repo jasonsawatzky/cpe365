@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.function.Consumer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Comparator;
 
 public class SchoolSearch {
     private static final int MINGRADE = 0;
@@ -60,7 +61,13 @@ public class SchoolSearch {
                             for(int i = MINGRADE; i <= MAXGRADE; i++){
                                 info(i, inputString);
                             }
-                			break;
+                			      break;
+
+                case 'E':   enrollment();
+                            break;
+
+                case 'P':   performance(inputString);
+                            break;
             }
 
             System.out.println();
@@ -115,7 +122,7 @@ public class SchoolSearch {
          while((line = br.readLine()) != null){
             s = new Scanner(line).useDelimiter(",");
             String ln = s.next();
-            String fn = s.next();
+            String fn = s.next().substring(1);
             int grade = s.nextInt();
             int cr = s.nextInt();
             int bus = s.nextInt();
@@ -208,14 +215,14 @@ public class SchoolSearch {
         Matcher matcher = commandFormat.matcher(input);
         Consumer<Student> printer;
         Consumer<Teacher> printerT;
-        
+
         if(!matcher.matches()) {
             return;
         }
         grade = Integer.parseInt(matcher.group(1));
         List<Student> results = students.stream().filter(s -> s.grade.equals(grade)).collect(Collectors.toList());
         List<Teacher> tlist = new ArrayList<>();
-        
+
         if(matcher.group(2).equals("")) {
             printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName);
             results.stream().forEach(printer);
@@ -230,9 +237,9 @@ public class SchoolSearch {
                 GPAFinal = tempGPA;
                 results = results.stream().filter(s -> s.gpa.equals(GPAFinal)).collect(Collectors.toList());
             }
-            
+
             if(matcher.group(2).equals("L") || matcher.group(2).equals("l") || matcher.group(2).equals("Low")){
-                
+
                 for(int i = 0; i < results.size(); i ++){
                     if(results.get(i).gpa < temp2GPA){
                         temp2GPA = results.get(i).gpa;
@@ -241,7 +248,7 @@ public class SchoolSearch {
                 GPAFinal2 = temp2GPA;
                 results = results.stream().filter(s -> s.gpa.equals(GPAFinal2)).collect(Collectors.toList());
             }
-            
+
             if(matcher.group(2).equals("T") || matcher.group(2).equals("t") || matcher.group(2).equals("Teacher")){
                 teach = 1;
                 results = results.stream().filter(s -> s.grade.equals(grade)).collect(Collectors.toList());
@@ -250,20 +257,20 @@ public class SchoolSearch {
                         tlist.add(results.get(i).teacher);
                     }
                 }
-                
+
             }
-            
+
             if(teach == 0){
                 printer = student -> System.out.println("Student: " + student.lastName + ", " + student.firstName + ", GPA: " + student.gpa + ", Teacher: " + student.teacher.lastName + ", " + student.teacher.firstName + ", Bus: " + student.bus);
                 results.stream().forEach(printer);
             }
-            
+
             if(teach == 1){
                 printerT = teacher -> System.out.println("Teacher: " + teacher.lastName + ", " + teacher.firstName);
                 tlist.stream().forEach(printerT);
             }
         }
-        
+
     }
     private void average(String input) {
         Pattern commandFormat = Pattern.compile("^\\s?(?:A|Average|a)\\s(\\w)\\s?$");
@@ -334,6 +341,43 @@ public class SchoolSearch {
         
     }
     
+    private void enrollment() {
+      Map<Integer, Integer> studentCount = new HashMap<>();
+
+      students.stream().forEach(student -> {
+          Integer count = studentCount.get(student.classroom);
+          if(count != null) {
+            studentCount.put(student.classroom, ++count);
+          }
+          else {
+            studentCount.put(student.classroom, 1);
+          }
+        });
+
+      studentCount.entrySet().stream().forEach(entry ->
+        System.out.println("Classroom: " + entry.getKey() + " # of Students: " + entry.getValue())
+      );
+    }
+
+    private void performance(String input) {
+      Pattern commandFormat = Pattern.compile("^\\s?(?:P|Performance|p)\\s(G|T|B)\\s?$");
+      Matcher matcher = commandFormat.matcher(input);
+      Comparator<Student> sortStudents;
+
+      if(!matcher.matches()) {
+          return;
+      }
+      else if(matcher.group(1).equalsIgnoreCase("G")) {
+        students.stream().sorted((student1, student2) -> student1.grade - student2.grade).forEach(student -> System.out.println("Grade: " + student.grade + " GPA: " + student.gpa));
+      }
+      else if(matcher.group(1).equalsIgnoreCase("T")) {
+        students.stream().sorted((student1, student2) -> student1.teacher.compareTo(student2.teacher)).forEach(student -> System.out.println("Teacher: " + student.teacher.toString() + " GPA: " + student.gpa));
+      }
+      else if(matcher.group(1).equalsIgnoreCase("B")) {
+        students.stream().sorted((student1, student2) -> student1.bus - student2.bus).forEach(student -> System.out.println("Bus: " + student.bus + " GPA: " + student.gpa));
+      }
+    }
+
     private static class Student {
 
       String lastName;
@@ -356,13 +400,26 @@ public class SchoolSearch {
 
    }
 
-   private static class Teacher {
+   private static class Teacher implements Comparable{
      String lastName;
      String firstName;
 
      public Teacher(String ln, String fn) {
        lastName = ln;
        firstName = fn;
+     }
+     public int compareTo(Object object) {
+       Teacher other = (Teacher) object;
+       if(!lastName.equals(other.lastName)) {
+         return lastName.compareTo(other.lastName);
+       }
+       else {
+         return firstName.compareTo(other.firstName);
+       }
+     }
+
+     public String toString() {
+       return lastName + ", " + firstName;
      }
    }
 

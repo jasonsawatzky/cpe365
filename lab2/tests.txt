@@ -137,17 +137,17 @@ printf "\nTesting Query:"
 printf "I\nQ\n"
 echo "with missing file"
 
-mv students.txt students-dne.txt
+mv list.txt list-dne.txt
 
 printf "I\nQ\n" > queryInput
 
 java SchoolSearch < queryInput > output
 
-printf "Unable to open file './students.txt'\n" > expectedOutput
+printf "Unable to open file './list.txt'\n" > expectedOutput
 
 diff output expectedOutput -s
 
-mv students-dne.txt students.txt
+mv list-dne.txt list.txt
 
 
 rm queryInput
